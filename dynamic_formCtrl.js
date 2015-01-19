@@ -1,4 +1,4 @@
-angular.module('AutoForm',['dynamicforms']).controller('DynamicFormCtrl', ['$scope', function($scope) {
+angular.module('AutoForm',['dynamicforms', 'simpleforms']).controller('DynamicFormCtrl', ['$scope', function($scope) {
 
   $scope.dynamicFormTemplate = {
 		name : "Course",
@@ -12,8 +12,8 @@ angular.module('AutoForm',['dynamicforms']).controller('DynamicFormCtrl', ['$sco
 {type: "search", name: "agreed", label: "agreed", col: "1"  ,properties: {required: true}, method: "openPop()"},
 {type: "range", name: "Range", label: "Range", col: "2"},
 {type: "color", name: "color", label: "Color Picker", col: "1"},
-{type: "select", name: "teacher_id", label: "Teacher", col: "2" , options: [{'id':'India','value': 'India'},{'id':'USA','value':'USA'},{'id':'UK','value': 'UK'}],properties: {placeholder: "select", onChange: 'test()', required: true}},
-{type: "radio", name: "subject", label: "Subject", col: "2" , options: [{'id':'1','value': 'English'},{'id':'2', 'value': 'Tamil'}],properties: {placeholder: "select", onChange: 'test()', required: true}},
+{type: "select", name: "teacher_id", label: "Teacher", col: "2" , options: [{'id':'India','value': 'India'},{'id':'USA','value':'USA'},{'id':'UK','value': 'UK'}],properties: {placeholder: "select", onClick: 'test()', required: true}},
+{type: "radio", name: "subject", label: "Subject", col: "2" , options: [{'id':'1','value': 'English'},{'id':'2', 'value': 'Tamil'}],properties: {placeholder: "select", onClick: 'test()', required: true}},
 {type: "submit", name: "Save",col:"1",properties: {onClick: 'test123()',class: 'btn btn-primary btn-lg active'}}
 ]
 };
