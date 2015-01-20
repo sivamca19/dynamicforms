@@ -26,6 +26,34 @@ angular.module('dynamicforms', ['ui.bootstrap'])
     onClick: 'ng-click'
   }
 
+  var supported = {
+        'text': 'text',
+        'date': 'text',
+        'datetime': 'text',
+        'datetime-local': 'text',
+        'email': 'text',
+        'month': 'text',
+        'number': 'text',
+        'password': 'text',
+        'search': 'search',
+        'tel': 'text',
+        'textarea': 'textarea',
+        'time': 'text',
+        'url': 'text',
+        'week': 'text',
+        'checkbox': 'text',
+        'color': 'text',
+        'file': 'text',
+        'range': 'text',
+        'select': 'select',
+        'radio': 'radio',
+        'button': 'button',
+        'hidden': 'text',
+        'image': 'text',
+        'reset': 'button',
+        'submit': 'button'
+    };
+
   var getFormHeader = function(methodName, formName){
     var formSubmit = methodName == undefined ? '' : "ng-submit="+methodName
     return "<form "+formSubmit+" name='"+formName+"'  novalidate><body-section></form>";
@@ -48,10 +76,15 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   }
 
   var getField = function(field, formName){
-    switch (field.type) {
+    var type = supported[field.type];
+
+    if(type == undefined)
+      return ''
+
+    switch (type) {
       case 'select': return getFieldWrapper(getSelectField(field, formName));
       case 'search': return getFieldWrapper(getSearchField(field, formName));
-      case 'submit': return getFieldWrapper(getSubmitField(field));
+      case 'button': return getFieldWrapper(getSubmitField(field));
       case 'radio': return  getFieldWrapper(getRadioField(field, formName));
       default: return getFieldWrapper(getTextField(field, true, formName));
     }
@@ -66,7 +99,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   }
 
   var getSubmitField = function(field){
-    var buttonTag = "<button type='submit'"+setProperties(field)+">"+field.name+"</button>";
+    var buttonTag = "<button type='"+field.type+"'"+setProperties(field)+">"+field.name+"</button>";
     return buttonTag;
   }
 
@@ -118,6 +151,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
     return validationMessage[key];
   }
+
   var capitalize = function(inputString){
     return inputString.substring(0,1).toUpperCase()+inputString.substring(1);
   }
@@ -128,7 +162,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
       var propertyElement = '';
       angular.forEach(field.properties, function (value, key){
-        if(key == 'class' && field.type != 'submit')
+        if(key == 'class' && supported[field.type] != 'button')
           value = 'form-control ' + value;
 
         if(defaultProperties[key])

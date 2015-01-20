@@ -14,7 +14,8 @@ angular.module('AutoForm',['dynamicforms', 'simpleforms']).controller('DynamicFo
 {type: "color", name: "color", label: "Color Picker", col: "1"},
 {type: "select", name: "teacher_id", label: "Teacher", col: "2" , options: [{'id':'India','value': 'India'},{'id':'USA','value':'USA'},{'id':'UK','value': 'UK'}],properties: {placeholder: "select", onClick: 'test()', required: true}},
 {type: "radio", name: "subject", label: "Subject", col: "3" , options: [{'id':'1','value': 'English'},{'id':'2', 'value': 'Tamil'}],properties: {placeholder: "select", onClick: 'test()', required: true}},
-{type: "submit", name: "Save",col:"1",properties: {onClick: 'test123()',class: 'btn btn-primary btn-lg active'}}
+{type: "reset", name: "Reset",col:"1",properties: {onClick: 'test123()',class: 'btn btn-primary btn-lg active'}},
+{type: "submit", name: "Save",col:"2",properties: {onClick: 'test123()',class: 'btn btn-primary btn-lg active'}}
 ]
 };
 

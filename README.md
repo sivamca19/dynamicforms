@@ -82,11 +82,9 @@ all of the things you can do with this module.
 * [datetime](#datetime)
 * [datetime-local](#datetime-local)
 * [email](#email)
-* [fieldset](#fieldset)
 * [file](#file)
 * [hidden](#hidden)
 * [image](#image)
-* [legend](#legend)
 * [month](#month)
 * [number](#number)
 * [password](#password)
@@ -211,15 +209,6 @@ all of the things you can do with this module.
     * `source`: the URL of the image to display in this control
 * __Other Notes:__
     * The value of `label` is used to set the `alt` attribute of this control
-
-#### legend ####
-* __Renders:__ `<legend></legend>`
-* __Additional Options:__
-    * None
-* __Other Notes:__
-    * As a display-only control, only `class`, `label`, `callback` (via [`ng-click`][]) and
-        `disabled` are supported on this control
-    * The value of `label` is used to set the contents of this control
 
 #### month ####
 * __Renders:__ `<input type="month">`
