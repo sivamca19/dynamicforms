@@ -62,18 +62,19 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
   var getSearchField = function(field, formName){
     var searchButton = '<span class="input-group-btn"><button class="btn btn-default" type="button" ng-click="$parent.'+field.method+'">Go!</button></span></div>';
-    return getLabel(field.label) +'<div class="input-group">' +getTextField(field, false, formName) + searchButton;
+    return getLabel(field.label) +'<div class="input-group">' +getTextField(field, false, formName) + searchButton + getError(field, formName);
   }
 
   var getTextField = function(field, includeLabel, formName){
-    var inputBox = "<input type='"+field.type+"' ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='form-control'/>";
-
-    return includeLabel ? (getLabel(field.label) + inputBox) : inputBox;
+    var inputBox = "<input type='"+field.type+"' name='"+field.name+"' ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='form-control'/>";
+    var errorBox = getError(field, formName);
+    
+    return includeLabel ? (getLabel(field.label) + inputBox + errorBox) : inputBox;
   }
 
   var getSelectField = function(field,formName){
-    var selectBox = "<select ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='form-control'>"+getSelectOptions(field.options)+"</select>"
-    return getLabel(field.label) + selectBox;
+    var selectBox = "<select name="+field.name+" ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='form-control'>"+getSelectOptions(field.options)+"</select>"
+    return getLabel(field.label) + selectBox + getError(field, formName);
   }
 
   var getSelectOptions = function(options){
@@ -86,6 +87,11 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
   var getLabel = function(labelName){
     return "<label class='control-label' for='"+labelName+"' >"+capitalize(labelName)+"</label>";
+  }
+  
+  var getError = function(field, formName){
+    var errorElement = '<p ng-if="'+formName+'.'+field.name+'.$error.required" class="help-block error-txt ng-scope">'+capitalize(field.label)+' Cannot Be Blank</p>';
+    return (field.properties && field.properties.required) ? errorElement : '';
   }
 
   var capitalize = function(inputString){
