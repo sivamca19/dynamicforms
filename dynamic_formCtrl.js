@@ -5,7 +5,7 @@ angular.module('AutoForm',['dynamicforms', 'simpleforms']).controller('DynamicFo
 		divArray: ['col-md-4', 'col-md-4','col-md-4'],
 		fields :
 		[
-	{type: "text", name: "name", label: "Name", col: "1" ,properties: {required: true, placeholder: "Name", onBlur: 'test()', class: 'siva'}},
+	{type: "text", name: "name", label: "Name", col: "1" ,properties: {required: true, placeholder: "Name", onBlur: 'test()', class: 'siva', maxlength: 3}},
 {type: "text", name: "description", label: "Description", col: "2"  ,properties: {required: true}},
 {type: "text", name: "value", label: "Value", col: "3"  ,properties: {required: true}},
 {type: "number", name: "age", label: "age", col: "1"  ,properties: {required: true}},

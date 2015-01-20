@@ -2,8 +2,22 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 .directive('buildForm',['$compile','$parse', function($compile,$parse){
   var defaultProperties = {
     placeholder: 'placeholder',
-    required: 'ng-required',
     class: 'class'
+  }
+
+  var validationProperties = {
+    required: 'ng-required',
+    maxlength: 'ng-maxlength',
+    minlength: 'ng-minlength',
+    pattern: 'ng-pattern'
+
+  }
+
+  var validationMessage = {
+    required: ' canot be blank.',
+    maxlength: ' should not exceed the maximum length.',
+    minlength: ' should have minimum length.',
+    pattern: ' is invalid.'
   }
 
   var actionProperties ={
@@ -14,7 +28,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
   var getFormHeader = function(methodName, formName){
     var formSubmit = methodName == undefined ? '' : "ng-submit="+methodName
-    return "<form "+formSubmit+" name='"+formName+"' ><body-section></form>";
+    return "<form "+formSubmit+" name='"+formName+"'  novalidate><body-section></form>";
   }
 
   var getWrapperDiv =  function(divArray){
@@ -68,7 +82,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   var getTextField = function(field, includeLabel, formName){
     var inputBox = "<input type='"+field.type+"' name='"+field.name+"' ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='form-control'/>";
     var errorBox = getError(field, formName);
-    
+
     return includeLabel ? (getLabel(field.label) + inputBox + errorBox) : inputBox;
   }
 
@@ -88,12 +102,22 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   var getLabel = function(labelName){
     return "<label class='control-label' for='"+labelName+"' >"+capitalize(labelName)+"</label>";
   }
-  
+
   var getError = function(field, formName){
-    var errorElement = '<p ng-if="'+formName+'.'+field.name+'.$error.required" class="help-block error-txt ng-scope">'+capitalize(field.label)+' Cannot Be Blank</p>';
-    return (field.properties && field.properties.required) ? errorElement : '';
+    var errors = '';
+    angular.forEach(field.properties, function (value, key){
+      if(validationProperties[key])
+        errors += '<p ng-if="'+formName+'.'+field.name+'.$error.'+key+'" class="help-block error-txt ng-scope">'+capitalize(field.label)+'  '+getValidationMessage(key)+'</p>';
+
+    });
+
+    return errors;
   }
 
+  var getValidationMessage = function(key){
+
+    return validationMessage[key];
+  }
   var capitalize = function(inputString){
     return inputString.substring(0,1).toUpperCase()+inputString.substring(1);
   }
@@ -109,7 +133,9 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
         if(defaultProperties[key])
           propertyElement += defaultProperties[key]+"='"+value+"'";
-        else
+        else if(validationProperties[key])
+          propertyElement += validationProperties[key]+"='"+value+"'";
+        else if(actionProperties[key])
           propertyElement += actionProperties[key]+"='$parent."+value+"'";
       });
       return propertyElement;
