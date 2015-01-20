@@ -3,8 +3,22 @@ angular.module('simpleforms',['ui.bootstrap'])
   var fieldClassName = "form-control";
   var defaultProperties = {
     placeholder: 'placeholder',
-    required: 'ng-required',
     class: 'class'
+  }
+
+  var validationProperties = {
+    required: 'ng-required',
+    maxlength: 'ng-maxlength',
+    minlength: 'ng-minlength',
+    pattern: 'ng-pattern'
+
+  }
+
+  var validationMessage = {
+    required: ' canot be blank.',
+    maxlength: ' should not exceed the maximum length.',
+    minlength: ' should have minimum length.',
+    pattern: ' is invalid.'
   }
 
   var actionProperties ={
@@ -12,6 +26,34 @@ angular.module('simpleforms',['ui.bootstrap'])
     onChange: 'ng-change',
     onClick: 'ng-click'
   }
+
+  var supported = {
+        'text': 'text',
+        'date': 'text',
+        'datetime': 'text',
+        'datetime-local': 'text',
+        'email': 'text',
+        'month': 'text',
+        'number': 'text',
+        'password': 'text',
+        'search': 'search',
+        'tel': 'text',
+        'textarea': 'textarea',
+        'time': 'text',
+        'url': 'text',
+        'week': 'text',
+        'checkbox': 'text',
+        'color': 'text',
+        'file': 'text',
+        'range': 'text',
+        'select': 'select',
+        'radio': 'radio',
+        'button': 'button',
+        'hidden': 'text',
+        'image': 'text',
+        'reset': 'button',
+        'submit': 'button'
+    };
 
   var getForm =  function(formName){
     var formElement = angular.element('<form novalidate>')
@@ -30,10 +72,12 @@ angular.module('simpleforms',['ui.bootstrap'])
   }
 
   var getField =  function(field, formName){
-    switch (field.type) {
+    var type = supported[field.type];
+
+    switch (type) {
       case 'select': return getSelectField(field, formName);
       case 'search': return getSearchWrapper(field, formName);
-      case 'submit': return getSubmitField(field, formName);
+      case 'button': return getSubmitField(field, formName);
       case 'radio': return getRadioField(field, formName);
       default: return getTextField(field, formName);
     }
@@ -129,13 +173,23 @@ angular.module('simpleforms',['ui.bootstrap'])
   }
 
   var getError = function(field, formName){
-    var errorElement = angular.element('<p>');
-    errorElement.attr('ng-if',formName+'.'+field.name+'.$error.required');
-    errorElement.addClass('help-block error-txt');
-    errorElement.text(capitalize(field.label)+" can't be blank.");
+    var errorWrapper = angular.element('<div>');
+    angular.forEach(field.properties, function (value, key){
+      if(validationProperties[key]){
+        var errorElement = angular.element('<p>');
+        errorElement.attr('ng-if',formName+'.'+field.name+'.$error.'+key);
+        errorElement.addClass('help-block error-txt');
+        errorElement.text(capitalize(field.label)+" "+ getValidationMessage(key));
+        errorWrapper.append(errorElement);
+      }
+    });
 
-    return errorElement;
+    return errorWrapper;
+  }
 
+  var getValidationMessage = function(key){
+
+    return validationMessage[key];
   }
 
   var setProperties = function(newElement, field){
@@ -151,6 +205,8 @@ angular.module('simpleforms',['ui.bootstrap'])
       }
       else if(actionProperties[key])
        inputBox.attr(actionProperties[key],"$parent."+value);
+      else if(validationProperties[key])
+        inputBox.attr(validationProperties[key], value);
 
     });
 
@@ -166,11 +222,12 @@ angular.module('simpleforms',['ui.bootstrap'])
   }
 
   var getSubmitField = function(field, formName){
-    var buttonElement = angular.element('<button type="submit">');
+    var newElement =  getFieldWrapper();
+    var buttonElement = angular.element('<button type="'+field.type+'">');
     buttonElement.addClass('btn btn-primary btn-lg active');
     buttonElement.text(field.name);
 
-    return buttonElement;
+    return newElement.append(buttonElement);
   }
 
   var getLabel = function(labelName){
