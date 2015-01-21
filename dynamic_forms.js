@@ -1,4 +1,4 @@
-angular.module('dynamicforms', ['ui.bootstrap'])
+angular.module('dynamicforms', ['ui.bootstrap', 'jquery.ui.datepicker'])
 .directive('buildForm',['$compile','$parse', function($compile,$parse){
   var defaultProperties = {
     placeholder: 'placeholder',
@@ -15,7 +15,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   }
 
   var validationMessage = {
-    required: ' canot be blank.',
+    required: ' cannot be blank.',
     maxlength: ' should not exceed the maximum length.',
     minlength: ' should have minimum length.',
     pattern: ' is invalid.'
@@ -29,11 +29,12 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
   var buttonClass = 'btn btn-primary btn-lg';
   var textFieldClass = 'form-control';
+  var dateFieldClass = 'form-control jqdatepicker';
   var labelClass = 'control-label';
 
   var supported = {
         'text': {type: 'text',defaultClass: textFieldClass},
-        'date': {type: 'text',defaultClass: textFieldClass},
+        'date': {type: 'text',defaultClass: dateFieldClass},
         'datetime': {type: 'text',defaultClass: textFieldClass},
         'datetime-local': {type: 'text',defaultClass: textFieldClass},
         'email': {type: 'text',defaultClass: textFieldClass},
@@ -193,6 +194,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
       });
       return propertyElement;
     }
+
     return {
       restrict: 'E',
       transclude: true,
@@ -230,3 +232,21 @@ angular.module('dynamicforms', ['ui.bootstrap'])
       }
     }
   }]);
+
+
+angular.module('jquery.ui.datepicker', []).directive('jqdatepicker', function ($parse, $filter) {
+  return {
+    restrict: 'C',
+    require: 'ngModel',
+    link: function (scope, element, attrs, ngModelCtrl) {
+      element.datepicker({
+        dateFormat: 'yy-mm-dd',
+        onSelect: function (date) {
+          var date = date.toString().replace(/-/g,',');
+          $parse(element.attr('ng-model')).assign(scope, new Date(date));
+          scope.$apply();
+        }
+      });
+    }
+  };
+});
