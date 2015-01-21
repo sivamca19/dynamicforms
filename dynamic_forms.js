@@ -2,7 +2,8 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 .directive('buildForm',['$compile','$parse', function($compile,$parse){
   var defaultProperties = {
     placeholder: 'placeholder',
-    class: 'class'
+    class: 'class',
+    id: 'id'
   }
 
   var validationProperties = {
@@ -26,32 +27,35 @@ angular.module('dynamicforms', ['ui.bootstrap'])
     onClick: 'ng-click'
   }
 
+  var buttonClass = 'btn btn-primary btn-lg';
+  var textFieldClass = 'form-control';
+  var labelClass = 'control-label';
+
   var supported = {
-        'text': 'text',
-        'date': 'text',
-        'datetime': 'text',
-        'datetime-local': 'text',
-        'email': 'text',
-        'month': 'text',
-        'number': 'text',
-        'password': 'text',
-        'search': 'search',
-        'tel': 'text',
-        'textarea': 'textarea',
-        'time': 'text',
-        'url': 'text',
-        'week': 'text',
-        'checkbox': 'text',
-        'color': 'text',
-        'file': 'text',
-        'range': 'text',
-        'select': 'select',
-        'radio': 'radio',
-        'button': 'button',
-        'hidden': 'text',
-        'image': 'text',
-        'reset': 'button',
-        'submit': 'button'
+        'text': {type: 'text',defaultClass: textFieldClass},
+        'date': {type: 'text',defaultClass: textFieldClass},
+        'datetime': {type: 'text',defaultClass: textFieldClass},
+        'datetime-local': {type: 'text',defaultClass: textFieldClass},
+        'email': {type: 'text',defaultClass: textFieldClass},
+        'month': {type: 'text',defaultClass: textFieldClass},
+        'number': {type: 'text',defaultClass: textFieldClass},
+        'password': {type: 'text',defaultClass: textFieldClass},
+        'search': {type: 'search', defaultClass: textFieldClass},
+        'tel': {type: 'text',defaultClass: textFieldClass},
+        'textarea': {type: 'textarea',defaultClass: textFieldClass},
+        'time': {type: 'text',defaultClass: textFieldClass},
+        'url': {type: 'text',defaultClass: textFieldClass},
+        'week': {type: 'text',defaultClass: textFieldClass},
+        'checkbox': {type: 'text',defaultClass: textFieldClass},
+        'color': {type: 'text',defaultClass: textFieldClass},
+        'file': {type: 'text',defaultClass: ''},
+        'range': {type: 'text',defaultClass: textFieldClass},
+        'select': {type: 'select',defaultClass: textFieldClass},
+        'radio': {type: 'radio'},
+        'button': {type: 'button',defaultClass: textFieldClass},
+        'hidden': {type: 'text',defaultClass: textFieldClass},
+        'reset': {type: 'button', defaultClass: buttonClass},
+        'submit': {type: 'button', defaultClass: buttonClass}
     };
 
   var getFormHeader = function(methodName, formName){
@@ -76,16 +80,18 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   }
 
   var getField = function(field, formName){
-    var type = supported[field.type];
 
-    if(type == undefined)
+    var supportedField = getDefaultValue(field, 'type')
+
+    if(supportedField == '')
       return ''
 
-    switch (type) {
+    switch (supportedField) {
       case 'select': return getFieldWrapper(getSelectField(field, formName));
       case 'search': return getFieldWrapper(getSearchField(field, formName));
       case 'button': return getFieldWrapper(getSubmitField(field));
       case 'radio': return  getFieldWrapper(getRadioField(field, formName));
+      case 'textarea': return  getFieldWrapper(getTextAreaField(field, formName));
       default: return getFieldWrapper(getTextField(field, true, formName));
     }
   }
@@ -113,19 +119,32 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   }
 
   var getTextField = function(field, includeLabel, formName){
-    var inputBox = "<input type='"+field.type+"' name='"+field.name+"' ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='form-control'/>";
+    var inputBox = "<input type='"+field.type+"' name='"+field.name+"' ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='"+getDefaultValue(field, 'defaultClass')+"'/>";
     var errorBox = getError(field, formName);
 
     return includeLabel ? (getLabel(field.label) + inputBox + errorBox) : inputBox;
   }
 
+  var getDefaultValue = function(field, hashKey){
+    var supportedField = supported[field.type];
+
+    return supportedField == undefined ? '' :  supportedField[hashKey]
+  }
+
+  var getTextAreaField = function(field, formName){
+    var textArea = "<textarea name='"+field.name+"'  ng-model='$parent."+formName+"."+field.name+"'" +setProperties(field)+" class='"+getDefaultValue(field, 'defaultClass')+"'></textarea>";
+
+    return getLabel(field.label) + textArea + getError(field, formName);
+
+  }
+
   var getSelectField = function(field,formName){
-    var selectBox = "<select name="+field.name+" ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='form-control'>"+getSelectOptions(field.options)+"</select>"
+    var selectBox = "<select name="+field.name+" ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='"+getDefaultValue(field, 'defaultClass')+"'>"+getSelectOptions(field.options, field.prompt)+"</select>"
     return getLabel(field.label) + selectBox + getError(field, formName);
   }
 
-  var getSelectOptions = function(options){
-    var selectOptions = '<option value=""></option>';
+  var getSelectOptions = function(options, prompt){
+    var selectOptions = '<option value="">'+(prompt == undefined ? '' : prompt)+'</option>';
     angular.forEach(options, function (option, keyId){
       selectOptions += "<option value='"+option.id+"'>"+option.value+"</option>";
     });
@@ -133,7 +152,7 @@ angular.module('dynamicforms', ['ui.bootstrap'])
   }
 
   var getLabel = function(labelName){
-    return "<label class='control-label' for='"+labelName+"' >"+capitalize(labelName)+"</label>";
+    return "<label class='"+labelClass+"' for='"+labelName+"' >"+capitalize(labelName)+"</label>";
   }
 
   var getError = function(field, formName){
@@ -162,8 +181,8 @@ angular.module('dynamicforms', ['ui.bootstrap'])
 
       var propertyElement = '';
       angular.forEach(field.properties, function (value, key){
-        if(key == 'class' && supported[field.type] != 'button')
-          value = 'form-control ' + value;
+        if(key == 'class' && getDefaultValue(field, 'type') != 'button')
+          value = getDefaultValue(field, 'defaultClass') + ' ' + value;
 
         if(defaultProperties[key])
           propertyElement += defaultProperties[key]+"='"+value+"'";
