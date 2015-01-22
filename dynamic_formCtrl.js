@@ -6,8 +6,8 @@ angular.module('AutoForm',['dynamicforms', 'simpleforms']).controller('DynamicFo
 		fields :
 		[
 	{type: "text", name: "name", label: "Name", col: "1" ,properties: {required: true, placeholder: "Name", onBlur: 'test()', class: 'test', maxlength: 3}},
-{type: "text", name: "description", label: "Description", col: "2"  ,properties: {required: true}},
-{type: "date", name: "date", label: "Date", col: "3"  ,properties: {required: true}},
+{type: "text", name: "description", label: "Description", col: "2"  ,properties: {required: true, uidatepicker: 'inline'}},
+{type: "date", name: "date", label: "Date", col: "3"  ,properties: {required: true, uidatepicker: 'external'}},
 {type: "number", name: "age", label: "age", col: "1"  ,properties: {required: true}},
 {type: "search", name: "agreed", label: "agreed", col: "2"  ,properties: {required: true}, method: "openPop()"},
 {type: "range", name: "Range", label: "Range", col: "3"},

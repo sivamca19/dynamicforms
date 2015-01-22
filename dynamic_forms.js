@@ -1,9 +1,11 @@
 angular.module('dynamicforms', ['ui.bootstrap', 'jquery.ui.datepicker'])
 .directive('buildForm',['$compile','$parse', function($compile,$parse){
+  var currentElementId = null;
   var defaultProperties = {
     placeholder: 'placeholder',
     class: 'class',
-    id: 'id'
+    id: 'id',
+    uidatepicker: 'uidatepicker'
   }
 
   var validationProperties = {
@@ -34,7 +36,7 @@ angular.module('dynamicforms', ['ui.bootstrap', 'jquery.ui.datepicker'])
 
   var supported = {
         'text': {type: 'text',defaultClass: textFieldClass},
-        'date': {type: 'text',defaultClass: dateFieldClass},
+        'date': {type: 'text',defaultClass: textFieldClass},
         'datetime': {type: 'text',defaultClass: textFieldClass},
         'datetime-local': {type: 'text',defaultClass: textFieldClass},
         'email': {type: 'text',defaultClass: textFieldClass},
@@ -120,10 +122,16 @@ angular.module('dynamicforms', ['ui.bootstrap', 'jquery.ui.datepicker'])
   }
 
   var getTextField = function(field, includeLabel, formName){
-    var inputBox = "<input type='"+field.type+"' name='"+field.name+"' ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='"+getDefaultValue(field, 'defaultClass')+"'/>";
+    var customAttribute =  field.properties && field.properties.uidatepicker == 'external' ? ("date-picker-id ="+ currentElementId.toString()) : '';
+    var inputBox = "<input type='"+field.type+"' name='"+field.name+"' ng-model='$parent."+formName+"."+field.name+"'"+setProperties(field)+" class ='"+getDefaultValue(field, 'defaultClass')+"'"+customAttribute+"  />";
     var errorBox = getError(field, formName);
+    inputBox = getExternalDatePicker(inputBox, field)
 
     return includeLabel ? (getLabel(field.label) + inputBox + errorBox) : inputBox;
+  }
+
+  var getExternalDatePicker = function(inputBox, field){
+    return field.properties && field.properties.uidatepicker == 'external' ? '<div class="input-group date calender-design" id="datepicker8">'+inputBox+'<span class="input-group-addon" ng-click="openCalendar('+currentElementId+');" opendatepicker ><span><i class="fa fa-calendar"></i></span></span></div>'  : inputBox;
   }
 
   var getDefaultValue = function(field, hashKey){
@@ -207,6 +215,7 @@ angular.module('dynamicforms', ['ui.bootstrap', 'jquery.ui.datepicker'])
         var formWrapper = getFormHeader('submitform()', formName);
         var childElement = $scope.formInfo.divArray == undefined ? '' : getWrapperDiv($scope.formInfo.divArray);
         angular.forEach($scope.formInfo.fields, function (option, childId) {
+          currentElementId = childId;
           if(option.col != undefined ){
            var regExp = new RegExp("<"+option.col+"-div>");
            var fieldRow = getField(option,formName) +"<"+option.col+"-div>"
@@ -234,19 +243,30 @@ angular.module('dynamicforms', ['ui.bootstrap', 'jquery.ui.datepicker'])
   }]);
 
 
-angular.module('jquery.ui.datepicker', []).directive('jqdatepicker', function ($parse, $filter) {
+angular.module('jquery.ui.datepicker', []).directive('uidatepicker', function ($parse, $filter) {
   return {
-    restrict: 'C',
+    restrict: 'A',
     require: 'ngModel',
     link: function (scope, element, attrs, ngModelCtrl) {
-      element.datepicker({
+      var pickerOptions = {
         dateFormat: 'yy-mm-dd',
+        showOn: false,
         onSelect: function (date) {
-          var date = date.toString().replace(/-/g,',');
-          $parse(element.attr('ng-model')).assign(scope, new Date(date));
+          var formattedDate = date.toString().replace(/-/g,',');
+          formattedDate = element.attr('type') == 'text' ? date : new Date(formattedDate)
+          $parse(element.attr('ng-model')).assign(scope, formattedDate);
           scope.$apply();
         }
-      });
+      }
+      if(attrs.uidatepicker == 'inline')
+        delete pickerOptions['showOn']
+
+      element.datepicker(pickerOptions);
+
+      scope.openCalendar = function(id){
+        angular.element(document.querySelectorAll("input[date-picker-id='"+id+"']")).datepicker('show');
+      };
+
     }
   };
 });
